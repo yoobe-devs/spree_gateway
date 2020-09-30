@@ -1,6 +1,6 @@
 module SpreeGateway
   class Engine < Rails::Engine
-    engine_name 'spree_gateway'
+    engine_name "spree_gateway"
 
     config.autoload_paths += %W(#{config.root}/lib)
 
@@ -20,6 +20,7 @@ module SpreeGateway
       app.config.spree.payment_methods << Spree::Gateway::Maxipago
       app.config.spree.payment_methods << Spree::Gateway::Migs
       app.config.spree.payment_methods << Spree::Gateway::Moneris
+      app.config.spree.payment_methods << Spree::Gateway::Pagarme
       app.config.spree.payment_methods << Spree::Gateway::PayJunction
       app.config.spree.payment_methods << Spree::Gateway::PayPalGateway
       app.config.spree.payment_methods << Spree::Gateway::PayflowPro
@@ -38,27 +39,27 @@ module SpreeGateway
     end
 
     def self.activate
-      Dir.glob(File.join(File.dirname(__FILE__), '../../app/**/spree/*_decorator*.rb')) do |c|
+      Dir.glob(File.join(File.dirname(__FILE__), "../../app/**/spree/*_decorator*.rb")) do |c|
         Rails.application.config.cache_classes ? require(c) : load(c)
       end
-      Dir.glob(File.join(File.dirname(__FILE__), '../../lib/active_merchant/**/*_decorator*.rb')) do |c|
+      Dir.glob(File.join(File.dirname(__FILE__), "../../lib/active_merchant/**/*_decorator*.rb")) do |c|
         Rails.application.config.cache_classes ? require(c) : load(c)
       end
     end
 
     def self.backend_available?
-      @@backend_available ||= ::Rails::Engine.subclasses.map(&:instance).map{ |e| e.class.to_s }.include?('Spree::Backend::Engine')
+      @@backend_available ||= ::Rails::Engine.subclasses.map(&:instance).map { |e| e.class.to_s }.include?("Spree::Backend::Engine")
     end
 
     def self.frontend_available?
-      @@frontend_available ||= ::Rails::Engine.subclasses.map(&:instance).map{ |e| e.class.to_s }.include?('Spree::Frontend::Engine')
+      @@frontend_available ||= ::Rails::Engine.subclasses.map(&:instance).map { |e| e.class.to_s }.include?("Spree::Frontend::Engine")
     end
 
     if self.backend_available?
       paths["app/views"] << "lib/views/backend"
     end
 
-    paths['app/controllers'] << 'lib/controllers'
+    paths["app/controllers"] << "lib/controllers"
 
     if self.frontend_available?
       paths["app/views"] << "lib/views/frontend"
