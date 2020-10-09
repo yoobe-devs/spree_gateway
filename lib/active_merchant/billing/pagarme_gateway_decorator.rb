@@ -148,7 +148,9 @@ module ActiveMerchant
         post[base][:name] = address.full_name
         post[base][:address] = {
           street: address.address1,
-          street_number: address.address2,
+          neighborhood: address.address2,
+          street_number: address.address_number,
+          complementary: address.complement,
           city: address.city,
           zipcode: address.zipcode,
         }
