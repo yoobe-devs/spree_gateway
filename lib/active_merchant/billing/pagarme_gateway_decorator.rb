@@ -27,6 +27,8 @@ module ActiveMerchant
         post[:metadata][:payment_id] = payment_id
         post[:metadata][:ip] = post[:metadata][:ip] || order.last_ip_address
 
+        post[:installments] = payment.installments if defined?(payment.installments)
+
         resp = commit(:post, "transactions", post)
         puts std
         resp
