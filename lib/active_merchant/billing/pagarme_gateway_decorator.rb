@@ -15,9 +15,16 @@ module ActiveMerchant
         order = ::Spree::Order.find_by(number: order_id)
         payment = order.payments.find_by(number: payment_id)
 
-        post = { customer: { id: payment_method.gateway_customer_profile_id } }
+        post = { }
+        if payment.payment_method.type == "Spree::Gateway::PagarmeBoleto"
+          post = { customer: { type: "individual", name: order.user.full_name, documents: [{type: "cpf", number: order.user.cpf }] } }
+          post[:payment_method] = 'boleto'
+        else
+          post = { customer: { id: payment_method.gateway_customer_profile_id } }
+          add_payment_method(post, payment_method)
+        end
+
         add_amount(post, money)
-        add_payment_method(post, payment_method)
         add_metadata(post, gateway_options)
         address_for(post, :billing, order.bill_address)
         shipment_deatils_for(post, order)
