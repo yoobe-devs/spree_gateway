@@ -1,4 +1,4 @@
 module Spree
-  class Gateway::PagarmeBoleto < Gateway
+  class Gateway::PagarmeBoleto < Gateway::Pagarme
   end
 end

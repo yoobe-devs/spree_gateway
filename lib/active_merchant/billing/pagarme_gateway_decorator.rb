@@ -1,3 +1,5 @@
+require 'securerandom'
+
 module ActiveMerchant
   module Billing
     module PagarmeGatewayDecorator
@@ -17,8 +19,11 @@ module ActiveMerchant
 
         post = { }
         if payment.payment_method.type == "Spree::Gateway::PagarmeBoleto"
+          payment.create_pagarme_billet({token: SecureRandom.hex(16)})
           post = { customer: { type: "individual", name: order.user.full_name, documents: [{type: "cpf", number: order.user.cpf }] } }
           post[:payment_method] = 'boleto'
+          post[:postback_url] = "https://store-api.diatena.com.br/api/v2/payment/billet/#{payment.pagarme_billet.id}?token=#{payment.pagarme_billet.token}"
+          post[:async] = false
         else
           post = { customer: { id: payment_method.gateway_customer_profile_id } }
           add_payment_method(post, payment_method)
