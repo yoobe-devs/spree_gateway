@@ -1,5 +1,6 @@
 module Spree
   class Gateway::Pagarme < Gateway
+    preference :api_key, :string
     preference :secret_key, :string
     preference :crypto_key, :string
 
