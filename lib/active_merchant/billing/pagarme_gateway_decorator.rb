@@ -142,7 +142,7 @@ module ActiveMerchant
           {
             id: line.sku,
             title: line.name,
-            unit_price: Money.new(line.price).cents,
+            unit_price: Spree::Money.new(line.price).cents,
             quantity: line.quantity,
             tangible: true,
           }
