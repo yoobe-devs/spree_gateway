@@ -117,7 +117,6 @@ module ActiveMerchant
           post[:postback_url] = "https://store-api.diatena.com.br/api/v2/payment/billet/#{payment.pagarme_billet.id}?token=#{payment.pagarme_billet.token}"
           post[:async] = false
         else
-          post[:reference_key] = payment_id
           post[:customer] = { id: spree_credit_card.gateway_customer_profile_id }
           add_payment_method(post, spree_credit_card)
         end
