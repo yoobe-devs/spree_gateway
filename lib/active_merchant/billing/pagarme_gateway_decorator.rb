@@ -10,62 +10,28 @@ module ActiveMerchant
         # base.live_url = 'https://api.pagar.me/1/'
       end
 
-      def purchase(money, payment_method, gateway_options = {})
+      def purchase(money, spree_credit_card, gateway_options = {})
         std = ""
         self.wiredump_device = std
-        order_id, payment_id = gateway_options[:order_id].split("-")
-        order = ::Spree::Order.find_by(number: order_id)
-        payment = order.payments.find_by(number: payment_id)
 
-        post = { }
-        if payment.payment_method.type == "Spree::Gateway::PagarmeBoleto"
-          payment.create_pagarme_billet({token: SecureRandom.hex(16)})
-          post = { customer: { type: "individual", name: order.user.full_name, documents: [{type: "cpf", number: order.user.cpf }] } }
-          post[:payment_method] = 'boleto'
-          post[:postback_url] = "https://store-api.diatena.com.br/api/v2/payment/billet/#{payment.pagarme_billet.id}?token=#{payment.pagarme_billet.token}"
-          post[:async] = false
-        else
-          post = { customer: { id: payment_method.gateway_customer_profile_id } }
-          add_payment_method(post, payment_method)
-        end
-
-        add_amount(post, money)
-        add_metadata(post, gateway_options)
-        address_for(post, :billing, order.bill_address)
-        shipment_deatils_for(post, order)
-        items_for(post, order)
-
-        post[:metadata][:order_id] = order_id
-        post[:metadata][:payment_id] = payment_id
-        post[:metadata][:ip] = post[:metadata][:ip] || order.last_ip_address
-
-        post[:installments] = payment.installments if defined?(payment.installments)
-
+        post = purchase_post(money, spree_credit_card, gateway_options)
+        
         resp = commit(:post, "transactions", post)
         puts std
         resp
       end
 
-      def authorize(money, payment_method, gateway_options = {})
-        order_id, payment_id = gateway_options[:order_id].split("-")
-        order = ::Spree::Order.find_by(number: order_id)
-        payment = order.payments.find_by(number: payment_id)
+      def authorize(money, spree_credit_card, gateway_options = {})
+        std = ""
+        self.wiredump_device = std
 
-        post = { customer: { id: payment_method.gateway_customer_profile_id } }
-        add_amount(post, money)
-        add_payment_method(post, payment_method)
-        add_metadata(post, gateway_options)
-        address_for(post, :billing, order.bill_address)
-        shipment_deatils_for(post, order)
-        items_for(post, order)
-
-        post[:metadata][:order_id] = order_id
-        post[:metadata][:payment_id] = payment_id
-        post[:metadata][:ip] = post[:metadata][:ip] || order.last_ip_address
+        post = purchase_post(money, spree_credit_card, gateway_options)
 
         post[:capture] = false
 
-        commit(:post, "transactions", post)
+        resp = commit(:post, "transactions", post)
+        puts std
+        resp
       end
 
       # Create or Update pagarme customer from Pagarme API
@@ -136,6 +102,40 @@ module ActiveMerchant
       # end
 
       private
+
+      def purchase_post(money, spree_credit_card, gateway_options)
+        order_id, payment_id = gateway_options[:order_id].split("-")
+        order = ::Spree::Order.find_by(number: order_id)
+        payment = order.payments.find_by(number: payment_id)
+
+        post = { customer: {} }
+
+        if payment.payment_method.type == "Spree::Gateway::PagarmeBoleto"
+          payment.create_pagarme_billet({token: SecureRandom.hex(16)})
+          post[:customer] = { type: "individual", name: order.user.full_name, documents: [{type: "cpf", number: order.user.cpf }] }
+          post[:payment_method] = 'boleto'
+          post[:postback_url] = "https://store-api.diatena.com.br/api/v2/payment/billet/#{payment.pagarme_billet.id}?token=#{payment.pagarme_billet.token}"
+          post[:async] = false
+        else
+          # post[:reference_key] = payment_id
+          post[:customer] = { id: spree_credit_card.gateway_customer_profile_id }
+          add_payment_method(post, spree_credit_card)
+        end
+
+        add_amount(post, money)
+        add_metadata(post, gateway_options)
+        address_for(post, :billing, order.bill_address)
+        shipment_deatils_for(post, order)
+        items_for(post, order)
+
+        post[:metadata][:order_id] = order_id
+        post[:metadata][:payment_id] = payment_id
+        post[:metadata][:ip] = post[:metadata][:ip] || order.last_ip_address
+
+        post[:installments] = payment.installments if defined?(payment.installments)
+
+        post
+      end
 
       def items_for(post, order)
         post[:items] = order.line_items.to_a.map do |line|
