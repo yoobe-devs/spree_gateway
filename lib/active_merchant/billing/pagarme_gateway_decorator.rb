@@ -137,7 +137,15 @@ module ActiveMerchant
       end
 
       def items_for(post, order)
-        post[:items] = order.line_items.to_a.map do |line|
+        line_items = order.line_items
+        amount = post[:amount].to_f/100
+        if amount != order.total.to_f
+          line_items = order.line_items.where(price: amount)
+        end
+
+        line_items = order.line_items if line_items.blank?
+
+        post[:items] = line_items.to_a.map do |line|
           {
             id: line.sku,
             title: line.name,
