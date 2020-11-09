@@ -175,6 +175,9 @@ module ActiveMerchant
           city: address.city,
           zipcode: address.zipcode,
         }
+
+        post[base][:address].delete :complementary if post[base][:address][:complementary].blank?
+
         if country = address.country
           post[base][:address].merge!(country: country.iso.downcase)
         end
