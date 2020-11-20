@@ -144,9 +144,14 @@ module Spree
         country: "br",
       }
 
-      options[:phone_numbers] << user.whatsapp unless user.whatsapp.blank?
+      options[:phone_numbers] << format_phone_number(user.whatsapp) unless user.whatsapp.blank?
 
       options
+    end
+
+    def format_phone_number(number)
+      number.gsub! /\D/, ""
+      number.size > 11 ? "+#{number}": "+55#{number}"
     end
 
     # In this gateway, what we call 'secret_key' is the 'login'
