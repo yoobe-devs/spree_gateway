@@ -16,9 +16,7 @@ module ActiveMerchant
 
         post = purchase_post(money, spree_credit_card, gateway_options)
         
-        resp = commit(:post, "transactions", post)
-        puts std
-        resp
+        commit(:post, "transactions", post)
       end
 
       def authorize(money, spree_credit_card, gateway_options = {})
@@ -29,9 +27,7 @@ module ActiveMerchant
 
         post[:capture] = false
 
-        resp = commit(:post, "transactions", post)
-        puts std
-        resp
+        commit(:post, "transactions", post)
       end
 
       # Create or Update pagarme customer from Pagarme API
@@ -106,6 +102,10 @@ module ActiveMerchant
       def purchase_post(money, spree_credit_card, gateway_options)
         order_id, payment_id = gateway_options[:order_id].split("-")
         order = ::Spree::Order.find_by(number: order_id)
+        
+        order.line_items.each {|i| ::Spree::Adjustable::AdjustmentsUpdater.update i }
+        order.update_totals
+
         payment = order.payments.find_by(number: payment_id)
 
         post = { customer: {} }
@@ -121,7 +121,12 @@ module ActiveMerchant
           add_payment_method(post, spree_credit_card)
         end
 
-        add_amount(post, money)
+        
+        amount = order.amount_to_authorize <= 0 ? 0.1 : order.amount_to_authorize
+        
+        payment.update amount: amount
+
+        add_amount(post, Spree::Money.new(amount).cents)
         add_metadata(post, gateway_options)
         address_for(post, :billing, order.bill_address)
         shipment_deatils_for(post, order)
