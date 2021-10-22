@@ -7,7 +7,7 @@ module ActiveMerchant
         base.supported_cardtypes += %i[american_express aura diners_club discover elo hipercard jcb master visa]
 
         # TODO: poder mudar para ambiente de teste
-        # base.live_url = 'https://api.pagar.me/1/'
+        # base.live_url = 'https://api.pagar.me/core/v5'
       end
 
       def purchase(money, spree_credit_card, gateway_options = {})
@@ -114,7 +114,6 @@ module ActiveMerchant
           payment.create_pagarme_billet({token: SecureRandom.hex(16)})
           post[:customer] = { type: "individual", name: order.user.full_name, documents: [{type: "cpf", number: order.user.cpf }] }
           post[:payment_method] = 'boleto'
-          post[:postback_url] = "https://store-api.diatena.com.br/api/v2/payment/billet/#{payment.pagarme_billet.id}?token=#{payment.pagarme_billet.token}"
           post[:async] = false
         else
           post[:customer] = { id: spree_credit_card.gateway_customer_profile_id }
@@ -217,12 +216,16 @@ module ActiveMerchant
           post[:card_id] = credit_card
         elsif credit_card.respond_to?(:gateway_payment_profile_id) && !credit_card.gateway_payment_profile_id.blank?
           post[:card_id] = credit_card.gateway_payment_profile_id
-        else
+        else  
           post[:card_number] = credit_card.number
           post[:card_holder_name] = credit_card.name
-          post[:card_expiration_date] = "#{credit_card.month}#{credit_card.year}".rjust(4, "0")
+          post[:card_expiration_date] = format_card_expiration_date(credit_card)
           post[:card_cvv] = credit_card.verification_value
         end
+      end
+
+      def format_card_expiration_date(credit_card)
+        "#{credit_card.month.to_s.rjust(2, "0")}#{credit_card.year.to_s.last(2)}"
       end
 
       def scrub(transcript)

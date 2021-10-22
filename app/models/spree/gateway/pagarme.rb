@@ -59,9 +59,9 @@ module Spree
     def create_customer(payment)
       user = payment.order.user
       response = provider.customer(customer_params(payment))
-      id = response.try(:params).try(:fetch, "id")
-
-      unless id.blank?
+      if response.success?
+        byebug
+        id = response.try(:params).try(:fetch, "id")
         payment.source.update!({
           gateway_customer_profile_id: id,
         })
@@ -144,7 +144,7 @@ module Spree
         country: "br",
       }
 
-      options[:phone_numbers] << format_phone_number(user.whatsapp) unless user.whatsapp.blank?
+      options[:phone_numbers] << format_phone_number(user.phone) unless user.phone.blank?
 
       options
     end

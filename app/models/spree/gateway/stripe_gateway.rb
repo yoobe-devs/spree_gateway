@@ -54,6 +54,7 @@ module Spree
 
     def create_profile(payment)
       return unless payment.source.gateway_customer_profile_id.nil?
+
       options = {
         email: payment.order.email,
         login: preferred_secret_key,
@@ -141,6 +142,10 @@ module Spree
       name_with_version = "SpreeGateway/#{SpreeGateway.version}"
       url = 'https://spreecommerce.org'
       "#{name_with_version} #{url}"
+    end
+
+    def public_preference_keys
+      %i[publishable_key test_mode]
     end
   end
 end
