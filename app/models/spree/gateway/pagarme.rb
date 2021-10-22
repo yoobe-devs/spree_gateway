@@ -60,14 +60,9 @@ module Spree
       user = payment.order.user
       response = provider.customer(customer_params(payment))
       if response.success?
-        byebug
         id = response.try(:params).try(:fetch, "id")
-        payment.source.update!({
-          gateway_customer_profile_id: id,
-        })
-        user.update!({
-          pagarme_id: id,
-        })
+        payment.source.update!({ gateway_customer_profile_id: id})
+        user.update!({pagarme_id: id})
       else
         payment.send(:gateway_error, response.message)
       end

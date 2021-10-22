@@ -172,12 +172,12 @@ module ActiveMerchant
         post[base] = {}
         post[base][:name] = address.full_name
         post[base][:address] = {
-          street: address.address1,
-          neighborhood: address.address2,
-          street_number: address.address_number,
-          complementary: address.complement,
+          street: address.street_name,
+          neighborhood: address.neighborhood || "",
+          street_number: address.number,
+          complementary: address.complement || "",
           city: address.city,
-          zipcode: address.zipcode,
+          zipcode: address.zipcode.gsub(/[^0-9]/, ""),
         }
 
         post[base][:address].delete :complementary if post[base][:address][:complementary].blank?
