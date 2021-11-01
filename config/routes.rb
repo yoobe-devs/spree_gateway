@@ -15,4 +15,6 @@ Spree::Core::Engine.add_routes do
       end
     end
   end
+
+  post "api/v2/payment/billet/:id", to: "pagarme_billet#post_back"
 end
