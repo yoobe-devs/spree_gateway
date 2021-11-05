@@ -151,7 +151,7 @@ module ActiveMerchant
 
         post[:items] = line_items.to_a.map do |line|
           {
-            id: line.sku,
+            id: "#{SecureRandom.hex(4)}_#{line.name.parameterize.underscore.camelize(:lower)}",
             title: line.name,
             unit_price: Spree::Money.new(line.price).cents,
             quantity: line.quantity,
