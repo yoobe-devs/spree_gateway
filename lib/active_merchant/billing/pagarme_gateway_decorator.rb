@@ -102,6 +102,7 @@ module ActiveMerchant
       def purchase_post(money, spree_credit_card, gateway_options)
         order_id, payment_id = gateway_options[:order_id].split("-")
         order = ::Spree::Order.find_by(number: order_id)
+        user = order.user
         
         order.line_items.each {|i| ::Spree::Adjustable::AdjustmentsUpdater.update i }
         order.update_totals
@@ -112,7 +113,7 @@ module ActiveMerchant
 
         if payment.payment_method.type == "Spree::Gateway::PagarmeBoleto"
           payment.create_pagarme_billet({token: SecureRandom.hex(16)})
-          post[:customer] = { type: "individual", name: order.user.full_name, documents: [{type: "cpf", number: order.user.cpf }] }
+          post[:customer] = { type: "individual", name: order.user.name, documents: [{type: user.document_type, number: user.document_value.gsub(/[^0-9]/, "") }] }
           post[:payment_method] = 'boleto'
           post[:async] = false
         else
@@ -120,7 +121,6 @@ module ActiveMerchant
           add_payment_method(post, spree_credit_card)
         end
 
-        
         amount = order.amount_to_authorize <= 0 ? 0.1 : order.amount_to_authorize
         
         payment.update amount: amount
