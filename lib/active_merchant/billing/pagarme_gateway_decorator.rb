@@ -109,7 +109,10 @@ module ActiveMerchant
 
         payment = order.payments.find_by(number: payment_id)
 
-        post = { customer: {} }
+        post = {
+          postback_url: ENV.fetch("PAGARME_POSTBACK_URL") { 'default_url' }
+          customer: {} 
+        }
 
         if payment.payment_method.type == "Spree::Gateway::PagarmeBoleto"
           payment.create_pagarme_billet({token: SecureRandom.hex(16)})
