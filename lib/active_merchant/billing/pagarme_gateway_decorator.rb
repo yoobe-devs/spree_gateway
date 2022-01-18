@@ -110,7 +110,7 @@ module ActiveMerchant
         payment = order.payments.find_by(number: payment_id)
 
         post = {
-          postback_url: ENV.fetch("PAGARME_POSTBACK_URL") { 'default_url' }
+          postback_url: ENV.fetch("PAGARME_POSTBACK_URL", 'default_url')
           customer: {} 
         }
 
