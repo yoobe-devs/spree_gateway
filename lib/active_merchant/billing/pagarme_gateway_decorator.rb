@@ -120,7 +120,7 @@ module ActiveMerchant
           post[:payment_method] = 'boleto'
           post[:async] = false
         else
-          post[:customer] = { id: spree_credit_card.gateway_customer_profile_id }
+          post[:customer] = { type: "individual", name: order.user.name, documents: [{type: user.document_type, number: user.document_value.gsub(/[^0-9]/, "") }] }
           add_payment_method(post, spree_credit_card)
         end
 
