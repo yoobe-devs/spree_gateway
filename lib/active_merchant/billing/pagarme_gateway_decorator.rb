@@ -112,7 +112,8 @@ module ActiveMerchant
         post = {
           postback_url: ENV.fetch("PAGARME_POSTBACK_URL", 'default_url'),
           customer: {}, 
-          async: false
+          async: false,
+          external_id: order.id
         }
 
         if payment.payment_method.type == "Spree::Gateway::PagarmeBoleto"
