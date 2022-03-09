@@ -112,16 +112,15 @@ module ActiveMerchant
         post = {
           postback_url: ENV.fetch("PAGARME_POSTBACK_URL", 'default_url'),
           customer: {}, 
-          async: false,
-          external_id: order.id
+          async: false
         }
 
         if payment.payment_method.type == "Spree::Gateway::PagarmeBoleto"
           payment.create_pagarme_billet({token: SecureRandom.hex(16)})
-          post[:customer] = { type: "individual", name: order.user.name, documents: [{type: user.document_type, number: user.document_value.gsub(/[^0-9]/, "") }] }
+          post[:customer] = { type: "individual",external_id: user.id.to_s, name: order.user.name, documents: [{type: user.document_type, number: user.document_value.gsub(/[^0-9]/, "") }] }
           post[:payment_method] = 'boleto'
         else
-          post[:customer] = { type: "individual", name: order.user.name, documents: [{type: user.document_type, number: user.document_value.gsub(/[^0-9]/, "") }] }
+          post[:customer] = { type: "individual", external_id: user.id.to_s, name: order.user.name, documents: [{type: user.document_type, number: user.document_value.gsub(/[^0-9]/, "") }] }
           add_payment_method(post, spree_credit_card)
         end
 
