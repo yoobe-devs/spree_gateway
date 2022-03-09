@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.name        = 'spree_gateway'
   s.version     = SpreeGateway.version
-  s.summary     = 'Additional Payment Gateways for Spree Commerce'
+  s.summary     = 'Additional Payment Gatew ays for Spree Commerce'
   s.description = s.summary
 
   s.author       = 'Spree Commerce'

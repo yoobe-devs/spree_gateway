@@ -1,6 +1,21 @@
 module ActiveMerchant
   module Billing
     module StripeGatewayDecorator
+
+      def create_post_for_auth_or_purchase(money, payment, options)
+        post = {}
+
+        if payment.is_a?(StripePaymentToken)
+          add_payment_token(post, payment, options)
+        else
+          add_creditcard(post, payment, options)
+        end
+
+        add_charge_details(post, money, payment, options)
+        post
+      end
+
+
       def verify(source, **options)
         customer = source.gateway_customer_profile_id
         bank_account_token = source.gateway_payment_profile_id
