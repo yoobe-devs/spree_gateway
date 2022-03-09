@@ -142,6 +142,34 @@ module ActiveMerchant
         post
       end
 
+      def customer_params(payment)
+        user = payment.order.user
+
+        options = {
+          external_id: user.id.to_s,
+          name: user.full_name,
+          email: payment.order.email,
+          # document_number: user.cpf.gsub(/[^0-9]/, ""),
+          # document_type: "cpf",
+          documents: [{
+            number: user.cpf.gsub(/[^0-9]/, ""),
+            type: "cpf",
+          }],
+          phone_numbers: [],
+          type: "individual",
+          country: "br",
+        }
+
+        options[:phone_numbers] << format_phone_number(user.phone) unless user.phone.blank?
+
+        options
+      end
+
+      def format_phone_number(number)
+        number.gsub! /\D/, ""
+        number.size > 11 ? "+#{number}": "+55#{number}"
+      end
+
       def items_for(post, order)
         line_items = order.line_items
         amount = post[:amount].to_f/100
