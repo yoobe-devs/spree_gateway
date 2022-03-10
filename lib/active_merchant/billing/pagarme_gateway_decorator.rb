@@ -152,7 +152,7 @@ module ActiveMerchant
           # document_number: user.cpf.gsub(/[^0-9]/, ""),
           # document_type: "cpf",
           documents: [{
-            number: user.cpf.gsub(/[^0-9]/, ""),
+            number: user.document_value.gsub(/[^0-9]/, ""),
             type: "cpf",
           }],
           phone_numbers: [],
@@ -160,7 +160,7 @@ module ActiveMerchant
           country: "br",
         }
 
-        options[:phone_numbers] << format_phone_number(user.phone) unless user.phone.blank?
+        options[:phone_numbers] << format_phone_number(user.contact_phone) unless user.contact_phone.blank?
 
         options
       end
