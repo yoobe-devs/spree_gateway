@@ -146,6 +146,7 @@ module ActiveMerchant
         user = payment.order.user
         normalized_document = user.document_value.gsub(/[^0-9]/, "")
         document_type = normalized_document&.size == 11 ? "cpf" : "cnpj"
+        type = document_type == "cpf" ? "individual" : "corporation"
 
         options = {
           external_id: user.id.to_s,
@@ -156,7 +157,7 @@ module ActiveMerchant
             number: normalized_document,
           }],
           phone_numbers: [],
-          type: "individual",
+          type: type,
           country: "br",
         }
 
