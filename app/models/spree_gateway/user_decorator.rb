@@ -7,8 +7,7 @@ module SpreeGateway
 end
 
 %i[
-  cpf
-  cnpj
+  document_type
   phone
 ].each do |attr|
   Spree::PermittedAttributes.user_attributes.push attr unless Spree::PermittedAttributes.user_attributes.include? attr
