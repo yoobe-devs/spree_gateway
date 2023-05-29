@@ -15,7 +15,7 @@ module ActiveMerchant
         self.wiredump_device = std
 
         post = purchase_post(money, spree_credit_card, gateway_options)
-        
+
         commit(:post, "transactions", post)
       end
 
@@ -103,7 +103,7 @@ module ActiveMerchant
         order_id, payment_id = gateway_options[:order_id].split("-")
         order = ::Spree::Order.find_by(number: order_id)
         user = order.user
-        
+
         order.line_items.each {|i| ::Spree::Adjustable::AdjustmentsUpdater.update i }
         order.update_totals
 
@@ -112,7 +112,7 @@ module ActiveMerchant
 
         post = {
           postback_url: ENV.fetch("PAGARME_POSTBACK_URL", 'default_url'),
-          customer: customer, 
+          customer: customer,
           async: false
         }
 
@@ -124,7 +124,7 @@ module ActiveMerchant
         end
 
         amount = order.amount_to_authorize <= 0 ? 0.1 : order.amount_to_authorize
-        
+
         payment.update amount: amount
 
         add_amount(post, Spree::Money.new(amount).cents)
@@ -144,16 +144,16 @@ module ActiveMerchant
 
       def customer_params(payment)
         user = payment.order.user
+        normalized_document = user.document_value.gsub(/[^0-9]/, "")
+        document_type = normalized_document&.size == 11 ? "cpf" : "cnpj"
 
         options = {
           external_id: user.id.to_s,
           name: user.full_name,
           email: payment.order.email,
-          # document_number: user.cpf.gsub(/[^0-9]/, ""),
-          # document_type: "cpf",
           documents: [{
-            number: user.document_value.gsub(/[^0-9]/, ""),
-            type: "cpf",
+            type: document_type,
+            number: normalized_document,
           }],
           phone_numbers: [],
           type: "individual",
@@ -246,7 +246,7 @@ module ActiveMerchant
           post[:card_id] = credit_card
         elsif credit_card.respond_to?(:gateway_payment_profile_id) && !credit_card.gateway_payment_profile_id.blank?
           post[:card_id] = credit_card.gateway_payment_profile_id
-        else  
+        else
           post[:card_number] = credit_card.number
           post[:card_holder_name] = credit_card.name
           post[:card_expiration_date] = format_card_expiration_date(credit_card)

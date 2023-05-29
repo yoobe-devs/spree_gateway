@@ -123,16 +123,16 @@ module Spree
 
     def customer_params(payment)
       user = payment.order.user
+      normalized_document = user.document_value.gsub(/[^0-9]/, "")
+      document_type = normalized_document&.size == 11 ? "cpf" : "cnpj"
 
       options = {
         external_id: user.id.to_s,
         name: user.full_name,
         email: payment.order.email,
-        # document_number: user.cpf.gsub(/[^0-9]/, ""),
-        # document_type: "cpf",
         documents: [{
-          number: user.cpf.gsub(/[^0-9]/, ""),
-          type: "cpf",
+          type: document_type,
+          number: normalized_document,
         }],
         phone_numbers: [],
         type: "individual",
