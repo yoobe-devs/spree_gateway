@@ -136,11 +136,10 @@ module Spree
           number: normalized_document,
         }],
         phone_numbers: [],
-        type: "",
+        type: type,
         country: "br",
       }
 
-      options[:type] = type
       options[:phone_numbers] << format_phone_number(user.phone) unless user.phone.blank?
 
       options

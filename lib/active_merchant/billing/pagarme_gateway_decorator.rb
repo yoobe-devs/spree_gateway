@@ -157,11 +157,9 @@ module ActiveMerchant
             number: normalized_document,
           }],
           phone_numbers: [],
-          type: "",
+          type: type,
           country: "br",
         }
-
-        options[:type] = type
         options[:phone_numbers] << format_phone_number(user.contact_phone) unless user.contact_phone.blank?
 
         options
@@ -270,7 +268,6 @@ module ActiveMerchant
 
       def default_customer
         {
-          type: "",
           country: "br",
           phone_numbers: [],
           documents: [],
